@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 export default function CreateBot() {
   const [name, setName] = useState('');
   const [systemPrompt, setSystemPrompt] = useState('');
+  const [description, setDescription] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { currentUser } = useAuth();
@@ -69,8 +70,10 @@ export default function CreateBot() {
       await addDoc(botsRef, {
         name,
         systemPrompt,
+        description,
         userId: currentUser.uid,
         createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       navigate('/');
@@ -108,6 +111,23 @@ export default function CreateBot() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="My Awesome Bot"
               />
+            </div>
+
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                Description
+              </label>
+              <input
+                type="text"
+                id="description"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="A brief description of what your bot does"
+              />
+              <p className="mt-2 text-sm text-gray-500">
+                Optional. This will be displayed on the dashboard.
+              </p>
             </div>
 
             <div>

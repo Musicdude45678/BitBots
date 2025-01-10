@@ -11,13 +11,16 @@ import {
   getDoc,
   updateDoc,
   writeBatch,
-  setDoc
+  setDoc,
+  Timestamp,
+  FieldValue
 } from 'firebase/firestore';
 
 export interface Message {
+  id?: string;
   content: string;
   senderId: string;
-  timestamp: any;
+  timestamp: Timestamp;
   isBot: boolean;
 }
 
@@ -26,7 +29,7 @@ export interface Chat {
   userId: string;
   botId: string;
   lastMessage?: string;
-  lastMessageTimestamp?: any;
+  lastMessageTimestamp?: Timestamp | FieldValue;
 }
 
 export interface Bot {
@@ -57,18 +60,18 @@ export const createChat = async (userId: string, botId: string): Promise<string>
 };
 
 // Send a message in a chat
-export const sendMessage = async (chatId: string, message: Omit<Message, 'timestamp'>) => {
+export async function sendMessage(chatId: string, message: Omit<Message, 'timestamp'>) {
   try {
-    const messageData = {
+    const chatRef = doc(db, 'chats', chatId);
+    const messagesRef = collection(chatRef, 'messages');
+
+    // Add message with server timestamp
+    await addDoc(messagesRef, {
       ...message,
       timestamp: serverTimestamp()
-    };
-    
-    // Add message to the messages subcollection
-    await addDoc(collection(db, 'chats', chatId, 'messages'), messageData);
-    
-    // Update the chat document with last message
-    const chatRef = doc(db, 'chats', chatId);
+    });
+
+    // Update chat's last message
     await updateDoc(chatRef, {
       lastMessage: message.content,
       lastMessageTimestamp: serverTimestamp()
@@ -82,7 +85,6 @@ export const sendMessage = async (chatId: string, message: Omit<Message, 'timest
 // Get all chats for a user with a specific bot
 export const getUserBotChats = async (userId: string, botId: string): Promise<Chat[]> => {
   try {
-    // Temporarily remove orderBy until index is created
     const chatsQuery = query(
       collection(db, 'chats'),
       where('userId', '==', userId),
@@ -97,8 +99,11 @@ export const getUserBotChats = async (userId: string, botId: string): Promise<Ch
 
     // Sort the chats client-side for now
     return chats.sort((a, b) => {
-      const timeA = a.lastMessageTimestamp?.seconds || 0;
-      const timeB = b.lastMessageTimestamp?.seconds || 0;
+      if (!a.lastMessageTimestamp || !b.lastMessageTimestamp) return 0;
+      
+      // When reading from Firestore, timestamps are always Timestamp objects
+      const timeA = (a.lastMessageTimestamp as Timestamp).seconds || 0;
+      const timeB = (b.lastMessageTimestamp as Timestamp).seconds || 0;
       return timeB - timeA;
     });
   } catch (error) {
@@ -108,15 +113,24 @@ export const getUserBotChats = async (userId: string, botId: string): Promise<Ch
 };
 
 // Get messages for a specific chat
-export const getChatMessages = async (chatId: string): Promise<Message[]> => {
+export async function getChatMessages(chatId: string): Promise<Message[]> {
   try {
+    const chatRef = doc(db, 'chats', chatId);
+    const messagesRef = collection(chatRef, 'messages');
     const messagesQuery = query(
-      collection(db, 'chats', chatId, 'messages'),
+      messagesRef,
       orderBy('timestamp', 'asc')
     );
     
     const querySnapshot = await getDocs(messagesQuery);
-    return querySnapshot.docs.map(doc => doc.data() as Message);
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        timestamp: data.timestamp
+      } as Message;
+    });
   } catch (error) {
     console.error('Error getting chat messages:', error);
     return [];

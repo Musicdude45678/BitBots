@@ -11,6 +11,7 @@ interface Bot {
   id: string;
   name: string;
   systemPrompt: string;
+  description: string;
   createdAt: Date;
 }
 
@@ -39,6 +40,7 @@ export default function Dashboard() {
             id: doc.id,
             name: data.name,
             systemPrompt: data.systemPrompt,
+            description: data.description,
             createdAt: data.createdAt.toDate(),
           });
         });
@@ -61,7 +63,7 @@ export default function Dashboard() {
     const result = await shareBot({
       botId,
       name: bot?.name,
-      description: bot?.systemPrompt
+      description: bot?.description
     });
 
     if (result.copied) {
@@ -176,12 +178,14 @@ export default function Dashboard() {
                     onClick={() => navigate(`/chat/${bot.id}`)}
                     className="cursor-pointer"
                   >
-                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 line-clamp-1">
-                      {bot.name}
-                    </h3>
-                    <p className="mt-2 text-sm text-gray-500 line-clamp-2">
-                      {bot.systemPrompt}
-                    </p>
+                    <div className="flex-1 min-w-0">
+                      <div className="block focus:outline-none">
+                        <p className="text-sm font-medium text-gray-900 truncate">{bot.name}</p>
+                        <p className="text-sm text-gray-500 line-clamp-2 h-10">
+                          {bot.description || 'No description provided'}
+                        </p>
+                      </div>
+                    </div>
                     <div className="mt-4 flex items-center justify-between text-sm">
                       <div className="text-gray-500">
                         Created {bot.createdAt.toLocaleDateString()}

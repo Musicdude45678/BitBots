@@ -1,4 +1,4 @@
-import { useState, FormEvent, useEffect, useCallback } from 'react';
+import { useState, FormEvent, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PaperAirplaneIcon, TrashIcon, PlusIcon, ShareIcon, Bars3Icon, XMarkIcon, ArrowLeftIcon } from '@heroicons/react/24/solid';
 import { auth } from '../config/firebase';
@@ -15,12 +15,14 @@ import {
   Chat
 } from '../services/chatService';
 import { shareBot } from '../utils/sharing';
+import { v4 as uuidv4 } from 'uuid';
+import { Timestamp } from 'firebase/firestore';
 
 interface Message {
-  id?: string;
+  id: string;
   content: string;
-  isBot: boolean;
-  timestamp: any;
+  role: 'user' | 'assistant';
+  timestamp: Timestamp;
 }
 
 export default function ChatInterface() {
@@ -33,12 +35,21 @@ export default function ChatInterface() {
   const [loading, setLoading] = useState(true);
   const [creatingChat, setCreatingChat] = useState(false);
   const [deletingChatId, setDeletingChatId] = useState<string | null>(null);
-  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [loadingMessages, setLoadingMessages] = useState(true);
   const [sharing, setSharing] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { botId } = useParams();
   const navigate = useNavigate();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, scrollToBottom]);
 
   useEffect(() => {
     const loadBotAndChats = async () => {
@@ -77,8 +88,9 @@ export default function ChatInterface() {
         } else {
           // Sort chats by timestamp and select the most recent
           const sortedChats = [...userBotChats].sort((a, b) => {
-            const timeA = a.lastMessageTimestamp?.seconds || 0;
-            const timeB = b.lastMessageTimestamp?.seconds || 0;
+            if (!a.lastMessageTimestamp || !b.lastMessageTimestamp) return 0;
+            const timeA = (a.lastMessageTimestamp as Timestamp).seconds || 0;
+            const timeB = (b.lastMessageTimestamp as Timestamp).seconds || 0;
             return timeB - timeA;
           });
           
@@ -105,8 +117,9 @@ export default function ChatInterface() {
         setLoadingMessages(true);
         const chatMessages = await getChatMessages(chatId);
         setMessages(chatMessages.map(msg => ({
+          id: msg.id || uuidv4(),
           content: msg.content,
-          isBot: msg.isBot,
+          role: msg.isBot ? 'assistant' : 'user',
           timestamp: msg.timestamp
         })));
       } catch (error) {
@@ -165,29 +178,32 @@ export default function ChatInterface() {
   };
 
   async function handleSubmit(e: FormEvent) {
+    const messageText = newMessage;
     e.preventDefault();
-    if (!newMessage.trim() || !chatId || !auth.currentUser || !bot) return;
+    if (!messageText.trim() || !chatId || !auth.currentUser || !bot) return;
 
+    const messageId = uuidv4();
     try {
       setSending(true);
 
-      // Add user message
-      const userMessage: Message = {
-        content: newMessage,
-        isBot: false,
-        timestamp: new Date(),
+      // Create the message object for UI
+      const newMessage: Message = {
+        id: messageId,
+        content: messageText,
+        role: 'user',
+        timestamp: Timestamp.now(),
       };
+
+      // Update UI immediately
+      setMessages(prev => [...prev, newMessage]);
+      setNewMessage('');
 
       // Send message to Firebase
       await sendMessage(chatId, {
-        content: newMessage,
+        content: messageText,
         senderId: auth.currentUser.uid,
         isBot: false
       });
-
-      // Update UI immediately
-      setMessages(prev => [...prev, userMessage]);
-      setNewMessage('');
 
       // Call OpenAI API
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -200,7 +216,7 @@ export default function ChatInterface() {
           model: 'gpt-3.5-turbo',
           messages: [
             { role: 'system', content: bot.systemPrompt },
-            { role: 'user', content: newMessage },
+            { role: 'user', content: messageText },
           ],
         }),
       });
@@ -219,14 +235,18 @@ export default function ChatInterface() {
 
       // Add assistant message to UI
       const assistantMessage: Message = {
+        id: uuidv4(),
         content: assistantResponse,
-        isBot: true,
-        timestamp: new Date(),
+        role: 'assistant',
+        timestamp: Timestamp.now(),
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+
     } catch (error) {
       console.error('Error sending message:', error);
+      // Optionally remove the message from UI if sending failed
+      setMessages(prev => prev.filter(msg => msg.id !== messageId));
     } finally {
       setSending(false);
     }
@@ -322,11 +342,9 @@ export default function ChatInterface() {
                       'New Chat'
                     )}
                   </p>
-                  {chat.lastMessageTimestamp && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      {new Date(chat.lastMessageTimestamp.seconds * 1000).toLocaleDateString()}
-                    </p>
-                  )}
+                  {chat.lastMessageTimestamp && (chat.lastMessageTimestamp as Timestamp).seconds
+                    ? new Date((chat.lastMessageTimestamp as Timestamp).seconds * 1000).toLocaleDateString()
+                    : 'No date'}
                 </div>
                 {chats.length > 1 && chat.id === chatId && (
                   <button
@@ -416,19 +434,31 @@ export default function ChatInterface() {
                 <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
                   {messages.map((message, index) => (
                     <div
-                      key={index}
+                      key={message.id || index}
                       className={`flex ${
-                        !message.isBot ? 'justify-end' : 'justify-start'
-                      }`}
+                        message.role === 'assistant' ? 'justify-start' : 'justify-end'
+                      } mb-4`}
                     >
                       <div
-                        className={`max-w-sm md:max-w-lg p-4 rounded-lg ${
-                          !message.isBot
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-900'
+                        className={`relative p-4 pb-6 rounded-lg ${
+                          message.role === 'assistant'
+                            ? 'bg-gray-100'
+                            : 'bg-blue-600 text-white'
                         }`}
                       >
-                        {message.content}
+                        <div className="whitespace-pre-wrap pr-16">{message.content}</div>
+                        <div 
+                          className={`absolute bottom-1 right-2 text-xs ${
+                            message.role === 'assistant' ? 'text-gray-500' : 'text-blue-200'
+                          }`}
+                        >
+                          {message.timestamp && message.timestamp.toDate
+                            ? message.timestamp.toDate().toLocaleTimeString([], { 
+                                hour: '2-digit', 
+                                minute: '2-digit'
+                              })
+                            : 'Invalid time'}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -443,6 +473,7 @@ export default function ChatInterface() {
                       </div>
                     </div>
                   )}
+                  <div ref={messagesEndRef} /> {/* Scroll anchor */}
                 </div>
               )}
             </div>
