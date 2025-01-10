@@ -1,11 +1,3 @@
-# Secrets stage
-FROM alpine:latest as secrets
-RUN --mount=type=secret,id=env,target=/run/secrets/.env \
-    if [ -f /run/secrets/.env ]; then \
-    mkdir -p /secrets && \
-    grep -E "^VITE_" /run/secrets/.env > /secrets/env; \
-    fi
-
 # Build stage
 FROM node:20-alpine AS builder
 
@@ -22,9 +14,6 @@ RUN npm ci --ignore-scripts
 
 # Copy source code
 COPY . .
-
-# Copy secrets from secrets stage
-COPY --from=secrets /secrets/env .env
 
 # Build the application
 RUN npm run build
