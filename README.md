@@ -1,15 +1,37 @@
 # BitBots - Create, Customize, and Share AI Bots
 
-BitBots is a web application that allows users to create, customize, and share AI-powered chatbots. Each bot can be customized with its own personality and capabilities through system prompts.
+BitBots is a web application that allows users to create, customize, and share AI-powered chatbots. Each bot can be customized with its own personality and capabilities through system prompts, enabling unique and engaging conversations.
 
 ## Features
 
-- User authentication with Firebase
+### Bot Management
 - Create and customize AI bots with unique system prompts
-- Interactive chat interface powered by OpenAI's GPT API
-- Share bots with other users
-- Offline access to chat history
+- Edit bot details including name, description, and system prompt
+- Delete bots and their associated chat history
+- Share bots with other users via unique links
+
+### Chat Interface
+- Real-time chat interface powered by OpenAI's GPT API
+- Multiple chat sessions per bot
+- Instant message display with smooth auto-scrolling
+- Message timestamps and chat history
+- Clean, modern UI with mobile responsiveness
+
+### User Experience
+- Secure user authentication with Firebase
+- Dashboard to manage all your bots
+- Sidebar navigation for quick access to chats
+- Share and collaborate with other users
+- Real-time updates and message synchronization
 - Modern, responsive UI built with React and TailwindCSS
+
+### Technical Features
+- TypeScript for enhanced type safety
+- Firebase Firestore for real-time data storage
+- OpenAI integration for natural language processing
+- Vite for fast development and building
+- TailwindCSS for responsive styling
+- Heroicons for beautiful UI elements
 
 ## Prerequisites
 
@@ -49,19 +71,34 @@ npm run dev
 
 5. Open your browser and navigate to `http://localhost:5173`
 
-## Firebase Setup
+## Available Scripts
 
-1. Create a new Firebase project at [Firebase Console](https://console.firebase.google.com)
-2. Enable Authentication and Firestore in your project
-3. Add a web app to your project and copy the configuration values to your `.env` file
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+- `npm run typecheck` - Run TypeScript type checking
+
+## Project Structure
+
+```
+src/
+├── components/     # Reusable UI components
+├── config/        # Configuration files (Firebase, etc.)
+├── contexts/      # React contexts (Auth, etc.)
+├── pages/         # Main application pages
+├── services/      # API and service functions
+└── utils/         # Utility functions
+```
 
 ## Contributing
 
 1. Fork the repository
-2. Create a new branch for your feature
-3. Make your changes
-4. Submit a pull request
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
 
 ## License
 
-[Your chosen license]
+[Your License Here]
