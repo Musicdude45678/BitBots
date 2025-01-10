@@ -12,6 +12,12 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
+// Debug log to check if environment variables are properly loaded
+if (!firebaseConfig.apiKey) {
+  console.error('Firebase API Key is missing!');
+  console.log('Environment variables available:', import.meta.env);
+}
+
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
