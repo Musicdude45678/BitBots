@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Debug: Print a clear start marker
+RUN echo "==================== BUILD STAGE START ===================="
+
 # Define build arguments for environment variables
 ARG VITE_FIREBASE_API_KEY
 ARG VITE_FIREBASE_AUTH_DOMAIN
@@ -13,16 +16,15 @@ ARG VITE_FIREBASE_APP_ID
 ARG VITE_OPENAI_API_KEY
 ARG VITE_APP_ENV
 
-# Debug: Print build arguments (masking sensitive values)
-RUN echo "=== Build Arguments ===" && \
-    echo "VITE_FIREBASE_API_KEY exists: $(if [ ! -z "$VITE_FIREBASE_API_KEY" ]; then echo "yes"; else echo "no"; fi)" && \
-    echo "VITE_FIREBASE_AUTH_DOMAIN exists: $(if [ ! -z "$VITE_FIREBASE_AUTH_DOMAIN" ]; then echo "yes"; else echo "no"; fi)" && \
-    echo "VITE_FIREBASE_PROJECT_ID exists: $(if [ ! -z "$VITE_FIREBASE_PROJECT_ID" ]; then echo "yes"; else echo "no"; fi)" && \
-    echo "VITE_FIREBASE_STORAGE_BUCKET exists: $(if [ ! -z "$VITE_FIREBASE_STORAGE_BUCKET" ]; then echo "yes"; else echo "no"; fi)" && \
-    echo "VITE_FIREBASE_MESSAGING_SENDER_ID exists: $(if [ ! -z "$VITE_FIREBASE_MESSAGING_SENDER_ID" ]; then echo "yes"; else echo "no"; fi)" && \
-    echo "VITE_FIREBASE_APP_ID exists: $(if [ ! -z "$VITE_FIREBASE_APP_ID" ]; then echo "yes"; else echo "no"; fi)" && \
-    echo "VITE_OPENAI_API_KEY exists: $(if [ ! -z "$VITE_OPENAI_API_KEY" ]; then echo "yes"; else echo "no"; fi)" && \
-    echo "VITE_APP_ENV exists: $(if [ ! -z "$VITE_APP_ENV" ]; then echo "yes"; else echo "no"; fi)"
+# Debug: Print build arguments
+RUN echo "==================== BUILD ARGS CHECK ====================" && \
+    echo "VITE_FIREBASE_API_KEY length: ${#VITE_FIREBASE_API_KEY}" && \
+    echo "VITE_FIREBASE_AUTH_DOMAIN length: ${#VITE_FIREBASE_AUTH_DOMAIN}" && \
+    echo "VITE_FIREBASE_PROJECT_ID length: ${#VITE_FIREBASE_PROJECT_ID}" && \
+    echo "VITE_FIREBASE_STORAGE_BUCKET length: ${#VITE_FIREBASE_STORAGE_BUCKET}" && \
+    echo "VITE_FIREBASE_MESSAGING_SENDER_ID length: ${#VITE_FIREBASE_MESSAGING_SENDER_ID}" && \
+    echo "VITE_FIREBASE_APP_ID length: ${#VITE_FIREBASE_APP_ID}" && \
+    echo "VITE_OPENAI_API_KEY length: ${#VITE_OPENAI_API_KEY}"
 
 # Set environment variables from build arguments
 ENV VITE_FIREBASE_API_KEY=$VITE_FIREBASE_API_KEY
@@ -34,16 +36,9 @@ ENV VITE_FIREBASE_APP_ID=$VITE_FIREBASE_APP_ID
 ENV VITE_OPENAI_API_KEY=$VITE_OPENAI_API_KEY
 ENV VITE_APP_ENV=$VITE_APP_ENV
 
-# Debug: Print environment variables after setting them (masking sensitive values)
-RUN echo "=== Environment Variables ===" && \
-    echo "VITE_FIREBASE_API_KEY exists: $(if [ ! -z "$VITE_FIREBASE_API_KEY" ]; then echo "yes"; else echo "no"; fi)" && \
-    echo "VITE_FIREBASE_AUTH_DOMAIN exists: $(if [ ! -z "$VITE_FIREBASE_AUTH_DOMAIN" ]; then echo "yes"; else echo "no"; fi)" && \
-    echo "VITE_FIREBASE_PROJECT_ID exists: $(if [ ! -z "$VITE_FIREBASE_PROJECT_ID" ]; then echo "yes"; else echo "no"; fi)" && \
-    echo "VITE_FIREBASE_STORAGE_BUCKET exists: $(if [ ! -z "$VITE_FIREBASE_STORAGE_BUCKET" ]; then echo "yes"; else echo "no"; fi)" && \
-    echo "VITE_FIREBASE_MESSAGING_SENDER_ID exists: $(if [ ! -z "$VITE_FIREBASE_MESSAGING_SENDER_ID" ]; then echo "yes"; else echo "no"; fi)" && \
-    echo "VITE_FIREBASE_APP_ID exists: $(if [ ! -z "$VITE_FIREBASE_APP_ID" ]; then echo "yes"; else echo "no"; fi)" && \
-    echo "VITE_OPENAI_API_KEY exists: $(if [ ! -z "$VITE_OPENAI_API_KEY" ]; then echo "yes"; else echo "no"; fi)" && \
-    echo "VITE_APP_ENV exists: $(if [ ! -z "$VITE_APP_ENV" ]; then echo "yes"; else echo "no"; fi)"
+# Debug: Print environment check
+RUN echo "==================== ENV CHECK ====================" && \
+    env | grep VITE_
 
 # Copy package files
 COPY package*.json ./
@@ -57,15 +52,30 @@ RUN npm ci --ignore-scripts
 # Copy source code
 COPY . .
 
-# Debug: Print contents of .env file if it exists
-RUN if [ -f .env ]; then echo "=== .env file exists ==="; else echo "=== .env file does not exist ==="; fi
+# Debug: Check for key files
+RUN echo "==================== FILE CHECK ====================" && \
+    ls -la && \
+    echo "Checking for .env file:" && \
+    ls -la .env* || echo "No .env files found" && \
+    echo "Checking vite.config.ts:" && \
+    cat vite.config.ts
 
-# Debug: Print environment before build
-RUN echo "=== Pre-build Environment ===" && \
-    node -e "console.log('Build-time environment:', process.env)"
+# Create a debug file to verify env vars at build time
+RUN echo "==================== CREATE DEBUG FILE ====================" && \
+    echo "window.BUILD_TIME_DEBUG = {" > /app/src/debug.js && \
+    echo "  VITE_FIREBASE_API_KEY_LENGTH: '${#VITE_FIREBASE_API_KEY}'," >> /app/src/debug.js && \
+    echo "  BUILD_TIME: '$(date)'," >> /app/src/debug.js && \
+    echo "};" >> /app/src/debug.js && \
+    cat /app/src/debug.js
 
 # Build the application
-RUN npm run build
+RUN echo "==================== STARTING BUILD ====================" && \
+    npm run build && \
+    echo "==================== BUILD COMPLETE ===================="
+
+# Debug: Check build output
+RUN echo "==================== BUILD OUTPUT CHECK ====================" && \
+    ls -la dist/
 
 # Production stage
 FROM nginx:alpine-slim
