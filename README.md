@@ -77,7 +77,31 @@ npm run dev
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
+- `npm run lint:fix` - Fix ESLint errors automatically
 - `npm run typecheck` - Run TypeScript type checking
+- `npm run format` - Format code with Prettier
+
+## Development Tools
+
+- **TypeScript** - Static type checking
+- **ESLint** - Code linting
+- **Prettier** - Code formatting
+- **Husky** - Git hooks
+- **lint-staged** - Run linters on staged files
+- **commitlint** - Lint commit messages
+
+## Code Quality
+
+This project uses several tools to ensure code quality:
+
+- **TypeScript** for type safety
+- **ESLint** for code linting
+- **Prettier** for consistent code formatting
+- **Husky** for pre-commit hooks
+- **lint-staged** for running linters on staged files
+- **commitlint** for conventional commit messages
+
+Commits must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
 
 ## Project Structure
 
