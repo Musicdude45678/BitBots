@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../config/firebase';
-import { getUserChats, Chat } from '../services/chatService';
+import { getUserBotChats, Chat } from '../services/chatService';
 
 export default function ChatList() {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -13,7 +13,7 @@ export default function ChatList() {
       if (!auth.currentUser) return;
       
       try {
-        const userChats = await getUserChats(auth.currentUser.uid);
+        const userChats = await getUserBotChats(auth.currentUser.uid, '');  
         setChats(userChats);
       } catch (error) {
         console.error('Error loading chats:', error);
@@ -62,7 +62,7 @@ export default function ChatList() {
             </div>
             {chat.lastMessageTimestamp && (
               <span className="text-xs text-gray-500">
-                {new Date(chat.lastMessageTimestamp.seconds * 1000).toLocaleDateString()}
+                {new Date((chat.lastMessageTimestamp as any).seconds * 1000).toLocaleDateString()}
               </span>
             )}
           </div>

@@ -10,7 +10,6 @@ import {
   getUserBotChats,
   deleteChat,
   getChatById,
-  Message as FirebaseMessage,
   Bot,
   Chat
 } from '../services/chatService';

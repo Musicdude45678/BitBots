@@ -4,7 +4,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { PlusIcon, PencilIcon, ShareIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { deleteBot, updateBot } from '../services/chatService';
+import { deleteBot } from '../services/chatService';
 import { shareBot } from '../utils/sharing';
 
 interface Bot {

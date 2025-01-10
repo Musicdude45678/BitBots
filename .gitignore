@@ -28,3 +28,7 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Docker
+.docker
+docker-compose.override.yml
