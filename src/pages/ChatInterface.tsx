@@ -277,7 +277,7 @@ export default function ChatInterface() {
   }
 
   return (
-    <div className="fixed inset-0 flex bg-white">
+    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
@@ -291,15 +291,15 @@ export default function ChatInterface() {
         className={`fixed inset-y-0 left-0 z-40 w-72 transform transition-transform duration-300 ease-in-out 
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
           lg:relative lg:translate-x-0 
-          bg-white border-r border-gray-200 flex flex-col`}
+          bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col`}
       >
         {/* Sidebar Header with New Chat Button */}
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <div className="flex-1 min-w-0 pr-2">
             <button
               onClick={handleNewChat}
               disabled={creatingChat}
-              className="flex items-center justify-center w-full px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 truncate"
+              className="flex items-center justify-center w-full px-3 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               {creatingChat ? (
                 <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
@@ -311,7 +311,7 @@ export default function ChatInterface() {
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="ml-1 flex-shrink-0 p-1 rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 lg:hidden"
+            className="ml-1 flex-shrink-0 p-1 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 lg:hidden"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
@@ -328,13 +328,13 @@ export default function ChatInterface() {
                   setSidebarOpen(false);
                 }
               }}
-              className={`p-4 cursor-pointer hover:bg-gray-100 ${
-                chat.id === chatId ? 'bg-gray-100' : ''
+              className={`p-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                chat.id === chatId ? 'bg-gray-100 dark:bg-gray-700' : ''
               }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
                     {chat.lastMessage ? (
                       <span className="line-clamp-1">{chat.lastMessage}</span>
                     ) : (
@@ -352,7 +352,7 @@ export default function ChatInterface() {
                       chat.id && handleDeleteChat(chat.id);
                     }}
                     disabled={deletingChatId === chat.id}
-                    className="ml-2 p-1 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                    className="ml-2 p-1 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-500 disabled:opacity-50"
                   >
                     {deletingChatId === chat.id ? (
                       <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-red-600" />
@@ -370,49 +370,51 @@ export default function ChatInterface() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col relative lg:pl-72">
         {/* Header */}
-        <div className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-2 sm:px-6">
-          <div className="flex justify-between items-center">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden -ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
-            >
-              <span className="sr-only">Open sidebar</span>
-              <Bars3Icon className="h-6 w-6" aria-hidden="true" />
-            </button>
-            <div className="flex items-center">
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">{bot?.name}</h1>
-                {bot?.description && (
-                  <p className="text-sm text-gray-500">{bot.description}</p>
-                )}
+        <div className="sticky top-0 z-30 bg-white dark:bg-gray-800 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-4">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden -ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              >
+                <span className="sr-only">Open sidebar</span>
+                <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+              </button>
+              <div className="flex items-center">
+                <div>
+                  <h1 className="text-xl font-semibold text-gray-900 dark:text-white">{bot?.name}</h1>
+                  {bot?.description && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{bot.description}</p>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleShare}
-                className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-                disabled={sharing}
-                title="Share Bot"
-              >
-                {sharing ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-gray-600" />
-                ) : (
-                  <ShareIcon className="h-4 w-4" />
-                )}
-                <span className="ml-2 hidden sm:inline">
-                  {shareSuccess ? 'Copied!' : 'Share'}
-                </span>
-              </button>
-              <button
-                onClick={() => navigate('/')}
-                className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                title="Back to Dashboard"
-              >
-                <ArrowLeftIcon className="h-4 w-4" />
-                <span className="ml-2 hidden sm:inline">
-                  Back to Dashboard
-                </span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleShare}
+                  className="inline-flex items-center justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+                  disabled={sharing}
+                  title="Share Bot"
+                >
+                  {sharing ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-gray-600" />
+                  ) : (
+                    <ShareIcon className="h-4 w-4" />
+                  )}
+                  <span className="ml-2 hidden sm:inline">
+                    {shareSuccess ? 'Copied!' : 'Share'}
+                  </span>
+                </button>
+                <button
+                  onClick={() => navigate('/')}
+                  className="inline-flex items-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  title="Back to Dashboard"
+                >
+                  <ArrowLeftIcon className="h-4 w-4" />
+                  <span className="ml-2 hidden sm:inline">
+                    Back to Dashboard
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -422,88 +424,62 @@ export default function ChatInterface() {
             <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
           </div>
         ) : (
-          <>
-            {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto pt-20 pb-24">
-              {loadingMessages ? (
-                <div className="flex justify-center py-8">
-                  <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
-                </div>
-              ) : (
-                <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
+          <div className="flex-1 overflow-hidden">
+            <div className="h-full flex flex-col max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto py-6" ref={messagesEndRef}>
+                <div className="space-y-6">
                   {messages.map((message, index) => (
                     <div
-                      key={message.id || index}
-                      className={`flex ${
-                        message.role === 'assistant' ? 'justify-start' : 'justify-end'
-                      } mb-4`}
+                      key={index}
+                      className={`flex ${message.role === 'assistant' ? 'justify-start' : 'justify-end'}`}
                     >
                       <div
-                        className={`relative p-4 pb-6 rounded-lg ${
+                        className={`rounded-lg px-4 py-2 max-w-[80%] ${
                           message.role === 'assistant'
-                            ? 'bg-gray-100'
-                            : 'bg-blue-600 text-white'
+                            ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'
+                            : 'bg-blue-600 dark:bg-blue-500 text-white'
                         }`}
                       >
-                        <div className="whitespace-pre-wrap pr-16">{message.content}</div>
-                        <div 
-                          className={`absolute bottom-1 right-2 text-xs ${
-                            message.role === 'assistant' ? 'text-gray-500' : 'text-blue-200'
-                          }`}
-                        >
-                          {message.timestamp && message.timestamp.toDate
-                            ? message.timestamp.toDate().toLocaleTimeString([], { 
-                                hour: '2-digit', 
-                                minute: '2-digit'
-                              })
-                            : 'Invalid time'}
-                        </div>
+                        {message.content}
                       </div>
                     </div>
                   ))}
-                  {sending && (
+                  {loadingMessages && (
                     <div className="flex justify-start">
-                      <div className="max-w-sm md:max-w-lg p-4 rounded-lg bg-gray-100">
-                        <div className="flex items-center space-x-2">
-                          <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <div className="bg-gray-200 dark:bg-gray-700 rounded-lg px-4 py-2">
+                        <div className="flex space-x-2">
+                          <div className="w-2 h-2 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce delay-100"></div>
+                          <div className="w-2 h-2 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce delay-200"></div>
                         </div>
                       </div>
                     </div>
                   )}
-                  <div ref={messagesEndRef} /> {/* Scroll anchor */}
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Message Input */}
-            <div className="absolute bottom-0 left-0 right-0 bg-white border-t">
-              <div className="max-w-3xl mx-auto p-4">
+              {/* Input form */}
+              <div className="border-t border-gray-200 dark:border-gray-700 py-4">
                 <form onSubmit={handleSubmit} className="flex space-x-4">
                   <input
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type your message..."
-                    className="flex-1 min-w-0 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-offset-2 focus:ring-blue-600 sm:text-sm sm:leading-6"
-                    disabled={sending}
+                    className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
                     type="submit"
-                    disabled={sending}
-                    className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                    disabled={!newMessage.trim() || sending}
+                    className="rounded-lg bg-blue-600 dark:bg-blue-500 px-4 py-2 text-white hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
                   >
-                    {sending ? (
-                      <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
-                    ) : (
-                      <PaperAirplaneIcon className="h-5 w-5" />
-                    )}
+                    Send
                   </button>
                 </form>
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>

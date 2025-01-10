@@ -3,6 +3,8 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { MoonIcon, SunIcon } from '@heroicons/react/24/outline';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -10,6 +12,7 @@ function classNames(...classes: string[]) {
 
 export default function Navigation() {
   const { currentUser, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -28,7 +31,7 @@ export default function Navigation() {
   };
 
   return (
-    <Disclosure as="nav" className="bg-white shadow">
+    <Disclosure as="nav" className={`bg-white dark:bg-gray-800 shadow`}>
       {({ open }) => (
         <>
           <div className="mx-auto px-4 sm:px-6 lg:px-8">
@@ -46,7 +49,7 @@ export default function Navigation() {
                 
                 {/* Logo */}
                 <div className="flex-shrink-0 flex items-center ml-2 sm:ml-0">
-                  <Link to="/" className="text-xl font-bold text-gray-900">
+                  <Link to="/" className="text-xl font-bold text-gray-900 dark:text-white">
                     BitBots
                   </Link>
                 </div>
@@ -71,7 +74,18 @@ export default function Navigation() {
               </div>
 
               {/* Right side - Profile dropdown */}
-              <div className="flex items-center">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={toggleTheme}
+                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none"
+                  aria-label="Toggle theme"
+                >
+                  {theme === 'dark' ? (
+                    <SunIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                  ) : (
+                    <MoonIcon className="h-5 w-5 text-gray-500" />
+                  )}
+                </button>
                 <Menu as="div" className="relative ml-3">
                   <div>
                     <Menu.Button className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
