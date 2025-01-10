@@ -31,14 +31,27 @@ export default function Navigation() {
     <Disclosure as="nav" className="bg-white shadow">
       {({ open }) => (
         <>
-          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 justify-between">
-              <div className="flex">
-                <div className="flex flex-shrink-0 items-center">
+              <div className="flex items-center">
+                {/* Mobile menu button */}
+                <Disclosure.Button className="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
+                  <span className="sr-only">Open main menu</span>
+                  {open ? (
+                    <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
+                  ) : (
+                    <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
+                  )}
+                </Disclosure.Button>
+                
+                {/* Logo */}
+                <div className="flex-shrink-0 flex items-center ml-2 sm:ml-0">
                   <Link to="/" className="text-xl font-bold text-gray-900">
                     BitBots
                   </Link>
                 </div>
+
+                {/* Desktop navigation */}
                 <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                   {navigation.map((item) => (
                     <Link
@@ -56,8 +69,9 @@ export default function Navigation() {
                   ))}
                 </div>
               </div>
-              <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                {/* Profile dropdown */}
+
+              {/* Right side - Profile dropdown */}
+              <div className="flex items-center">
                 <Menu as="div" className="relative ml-3">
                   <div>
                     <Menu.Button className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
@@ -106,20 +120,10 @@ export default function Navigation() {
                   </Transition>
                 </Menu>
               </div>
-              <div className="-mr-2 flex items-center sm:hidden">
-                {/* Mobile menu button */}
-                <Disclosure.Button className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
-                  <span className="sr-only">Open main menu</span>
-                  {open ? (
-                    <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
-                  ) : (
-                    <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
-                  )}
-                </Disclosure.Button>
-              </div>
             </div>
           </div>
 
+          {/* Mobile menu panel */}
           <Disclosure.Panel className="sm:hidden">
             <div className="space-y-1 pb-3 pt-2">
               {navigation.map((item) => (
@@ -137,27 +141,6 @@ export default function Navigation() {
                   {item.name}
                 </Disclosure.Button>
               ))}
-            </div>
-            <div className="border-t border-gray-200 pb-3 pt-4">
-              <div className="flex items-center px-4">
-                <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                  {currentUser?.email?.charAt(0).toUpperCase()}
-                </div>
-                <div className="ml-3">
-                  <div className="text-sm font-medium text-gray-500">
-                    {currentUser?.email}
-                  </div>
-                </div>
-              </div>
-              <div className="mt-3 space-y-1">
-                <Disclosure.Button
-                  as="button"
-                  onClick={handleLogout}
-                  className="block w-full px-4 py-2 text-left text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-                >
-                  Sign out
-                </Disclosure.Button>
-              </div>
             </div>
           </Disclosure.Panel>
         </>

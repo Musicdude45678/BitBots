@@ -1,6 +1,6 @@
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, FormEvent, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PaperAirplaneIcon, TrashIcon, PlusIcon, ShareIcon } from '@heroicons/react/24/solid';
+import { PaperAirplaneIcon, TrashIcon, PlusIcon, ShareIcon, Bars3Icon, XMarkIcon, ArrowLeftIcon } from '@heroicons/react/24/solid';
 import { auth } from '../config/firebase';
 import { 
   createChat, 
@@ -36,6 +36,7 @@ export default function ChatInterface() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { botId } = useParams();
   const navigate = useNavigate();
 
@@ -257,9 +258,31 @@ export default function ChatInterface() {
   }
 
   return (
-    <div className="fixed inset-0 flex">
+    <div className="fixed inset-0 flex bg-white">
+      {/* Mobile sidebar backdrop */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-20 bg-gray-600 bg-opacity-75 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Chat List Sidebar */}
-      <div className="w-64 flex-shrink-0 border-r bg-gray-50 flex flex-col">
+      <div 
+        className={`
+          fixed inset-y-0 left-0 z-30 w-64 transform bg-white transition-transform duration-300 ease-in-out
+          lg:relative lg:translate-x-0 lg:shadow-none
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        {/* Close button for mobile */}
+        <button
+          className="absolute right-2 top-2 p-2 text-gray-500 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        >
+          <XMarkIcon className="h-6 w-6" />
+        </button>
+
         {/* Sidebar Header */}
         <div className="p-4 border-b">
           <button
@@ -281,7 +304,12 @@ export default function ChatInterface() {
           {chats.map((chat) => (
             <div
               key={chat.id}
-              onClick={() => chat.id && setChatId(chat.id)}
+              onClick={() => {
+                if (chat.id) {
+                  setChatId(chat.id);
+                  setSidebarOpen(false);
+                }
+              }}
               className={`p-4 cursor-pointer hover:bg-gray-100 ${
                 chat.id === chatId ? 'bg-gray-100' : ''
               }`}
@@ -329,30 +357,45 @@ export default function ChatInterface() {
         <div className="absolute top-0 left-0 right-0 bg-white shadow-sm z-10">
           <div className="px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">{bot?.name}</h1>
-                {bot?.description && (
-                  <p className="text-sm text-gray-500">{bot.description}</p>
-                )}
+              <div className="flex items-center">
+                <button
+                  className="p-2 -ml-2 text-gray-500 lg:hidden"
+                  onClick={() => setSidebarOpen(true)}
+                >
+                  <Bars3Icon className="h-6 w-6" />
+                </button>
+                <div>
+                  <h1 className="text-xl font-semibold text-gray-900">{bot?.name}</h1>
+                  {bot?.description && (
+                    <p className="text-sm text-gray-500">{bot.description}</p>
+                  )}
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleShare}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 flex items-center gap-2"
+                  className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
                   disabled={sharing}
+                  title="Share Bot"
                 >
                   {sharing ? (
                     <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-gray-600" />
                   ) : (
                     <ShareIcon className="h-4 w-4" />
                   )}
-                  {shareSuccess ? 'Copied!' : 'Share'}
+                  <span className="ml-2 hidden sm:inline">
+                    {shareSuccess ? 'Copied!' : 'Share'}
+                  </span>
                 </button>
                 <button
                   onClick={() => navigate('/')}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  title="Back to Dashboard"
                 >
-                  Back to Dashboard
+                  <ArrowLeftIcon className="h-4 w-4" />
+                  <span className="ml-2 hidden sm:inline">
+                    Back to Dashboard
+                  </span>
                 </button>
               </div>
             </div>
