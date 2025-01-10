@@ -1,25 +1,13 @@
+# Secrets stage
+FROM alpine:latest as secrets
+RUN --mount=type=secret,id=env,target=/run/secrets/.env \
+    if [ -f /run/secrets/.env ]; then \
+    mkdir -p /secrets && \
+    grep -E "^VITE_" /run/secrets/.env > /secrets/env; \
+    fi
+
 # Build stage
 FROM node:20-alpine AS builder
-
-# Build arguments for environment variables
-ARG VITE_FIREBASE_API_KEY
-ARG VITE_FIREBASE_AUTH_DOMAIN
-ARG VITE_FIREBASE_PROJECT_ID
-ARG VITE_FIREBASE_STORAGE_BUCKET
-ARG VITE_FIREBASE_MESSAGING_SENDER_ID
-ARG VITE_FIREBASE_APP_ID
-ARG VITE_OPENAI_API_KEY
-ARG VITE_APP_ENV
-
-# Set environment variables
-ENV VITE_FIREBASE_API_KEY=$VITE_FIREBASE_API_KEY \
-    VITE_FIREBASE_AUTH_DOMAIN=$VITE_FIREBASE_AUTH_DOMAIN \
-    VITE_FIREBASE_PROJECT_ID=$VITE_FIREBASE_PROJECT_ID \
-    VITE_FIREBASE_STORAGE_BUCKET=$VITE_FIREBASE_STORAGE_BUCKET \
-    VITE_FIREBASE_MESSAGING_SENDER_ID=$VITE_FIREBASE_MESSAGING_SENDER_ID \
-    VITE_FIREBASE_APP_ID=$VITE_FIREBASE_APP_ID \
-    VITE_OPENAI_API_KEY=$VITE_OPENAI_API_KEY \
-    VITE_APP_ENV=$VITE_APP_ENV
 
 WORKDIR /app
 
@@ -35,11 +23,14 @@ RUN npm ci --ignore-scripts
 # Copy source code
 COPY . .
 
+# Copy secrets from secrets stage
+COPY --from=secrets /secrets/env .env
+
 # Build the application
 RUN npm run build
 
 # Production stage
-FROM nginx:alpine
+FROM nginx:alpine-slim
 
 # Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
