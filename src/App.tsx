@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import CreateBot from './pages/CreateBot';
+import EditBot from './pages/EditBot';
 import ChatInterface from './pages/ChatInterface';
 import ShareRedirect from './pages/ShareRedirect';
 
@@ -37,6 +38,7 @@ function App() {
                         <Routes>
                           <Route path="/" element={<Dashboard />} />
                           <Route path="/create-bot" element={<CreateBot />} />
+                          <Route path="/edit-bot/:botId" element={<EditBot />} />
                           <Route path="/chat/:botId" element={<ChatInterface />} />
                         </Routes>
                       </div>

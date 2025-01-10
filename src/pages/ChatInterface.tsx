@@ -269,33 +269,32 @@ export default function ChatInterface() {
 
       {/* Chat List Sidebar */}
       <div 
-        className={`
-          fixed inset-y-0 left-0 z-30 w-64 transform bg-white transition-transform duration-300 ease-in-out
-          lg:relative lg:translate-x-0 lg:shadow-none
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}
+        className={`fixed inset-y-0 left-0 z-40 w-72 transform transition-transform duration-300 ease-in-out 
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+          lg:relative lg:translate-x-0 
+          bg-white border-r border-gray-200 flex flex-col`}
       >
-        {/* Close button for mobile */}
-        <button
-          className="absolute right-2 top-2 p-2 text-gray-500 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        >
-          <XMarkIcon className="h-6 w-6" />
-        </button>
-
-        {/* Sidebar Header */}
-        <div className="p-4 border-b">
+        {/* Sidebar Header with New Chat Button */}
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+          <div className="flex-1 min-w-0 pr-2">
+            <button
+              onClick={handleNewChat}
+              disabled={creatingChat}
+              className="flex items-center justify-center w-full px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 truncate"
+            >
+              {creatingChat ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
+              ) : (
+                <PlusIcon className="h-4 w-4 mr-1 flex-shrink-0" />
+              )}
+              <span className="truncate">{creatingChat ? 'Creating...' : 'New Chat'}</span>
+            </button>
+          </div>
           <button
-            onClick={handleNewChat}
-            disabled={creatingChat}
-            className="w-full inline-flex items-center justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50"
+            onClick={() => setSidebarOpen(false)}
+            className="ml-1 flex-shrink-0 p-1 rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 lg:hidden"
           >
-            {creatingChat ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
-            ) : (
-              <PlusIcon className="h-4 w-4 mr-1" />
-            )}
-            {creatingChat ? 'Creating...' : 'New Chat'}
+            <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
         
@@ -352,52 +351,51 @@ export default function ChatInterface() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col relative">
+      <div className="flex-1 flex flex-col relative lg:pl-72">
         {/* Header */}
-        <div className="absolute top-0 left-0 right-0 bg-white shadow-sm z-10">
-          <div className="px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <button
-                  className="p-2 -ml-2 text-gray-500 lg:hidden"
-                  onClick={() => setSidebarOpen(true)}
-                >
-                  <Bars3Icon className="h-6 w-6" />
-                </button>
-                <div>
-                  <h1 className="text-xl font-semibold text-gray-900">{bot?.name}</h1>
-                  {bot?.description && (
-                    <p className="text-sm text-gray-500">{bot.description}</p>
-                  )}
-                </div>
+        <div className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-2 sm:px-6">
+          <div className="flex justify-between items-center">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden -ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+            >
+              <span className="sr-only">Open sidebar</span>
+              <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+            </button>
+            <div className="flex items-center">
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">{bot?.name}</h1>
+                {bot?.description && (
+                  <p className="text-sm text-gray-500">{bot.description}</p>
+                )}
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleShare}
-                  className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-                  disabled={sharing}
-                  title="Share Bot"
-                >
-                  {sharing ? (
-                    <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-gray-600" />
-                  ) : (
-                    <ShareIcon className="h-4 w-4" />
-                  )}
-                  <span className="ml-2 hidden sm:inline">
-                    {shareSuccess ? 'Copied!' : 'Share'}
-                  </span>
-                </button>
-                <button
-                  onClick={() => navigate('/')}
-                  className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  title="Back to Dashboard"
-                >
-                  <ArrowLeftIcon className="h-4 w-4" />
-                  <span className="ml-2 hidden sm:inline">
-                    Back to Dashboard
-                  </span>
-                </button>
-              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleShare}
+                className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+                disabled={sharing}
+                title="Share Bot"
+              >
+                {sharing ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-gray-600" />
+                ) : (
+                  <ShareIcon className="h-4 w-4" />
+                )}
+                <span className="ml-2 hidden sm:inline">
+                  {shareSuccess ? 'Copied!' : 'Share'}
+                </span>
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                title="Back to Dashboard"
+              >
+                <ArrowLeftIcon className="h-4 w-4" />
+                <span className="ml-2 hidden sm:inline">
+                  Back to Dashboard
+                </span>
+              </button>
             </div>
           </div>
         </div>
