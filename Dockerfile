@@ -46,8 +46,9 @@ COPY package*.json ./
 # Prevent Husky install during npm ci
 ENV HUSKY=0
 
-# Install dependencies
-RUN npm ci --ignore-scripts
+# Install dependencies with verbose logging
+RUN echo "==================== INSTALLING DEPENDENCIES ====================" && \
+    npm ci --ignore-scripts --verbose
 
 # Copy source code
 COPY . .
@@ -68,10 +69,11 @@ RUN echo "==================== CREATE DEBUG FILE ====================" && \
     echo "};" >> /app/src/debug.js && \
     cat /app/src/debug.js
 
-# Build the application
+# Build the application with detailed error output
 RUN echo "==================== STARTING BUILD ====================" && \
-    npm run build && \
-    echo "==================== BUILD COMPLETE ===================="
+    npm run build --verbose || (echo "==================== BUILD ERROR ====================" && \
+    cat /root/.npm/_logs/*-debug.log && \
+    exit 1)
 
 # Debug: Check build output
 RUN echo "==================== BUILD OUTPUT CHECK ====================" && \
