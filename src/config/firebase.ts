@@ -17,7 +17,6 @@ const debugInfo = {
 console.log('Firebase Configuration Debug Info:', debugInfo);
 
 const firebaseConfig = {
-  // Your Firebase configuration will go here
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -33,10 +32,14 @@ Object.entries(firebaseConfig).forEach(([key, value]) => {
   }
 });
 
+let app;
+let auth;
+let db;
+
 try {
-  const app = initializeApp(firebaseConfig);
-  export const auth = getAuth(app);
-  export const db = getFirestore(app);
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
 } catch (error) {
   console.error('Firebase initialization error:', error);
   console.error('Firebase config used:', {
@@ -49,3 +52,5 @@ try {
   });
   throw error;
 }
+
+export { auth, db };
