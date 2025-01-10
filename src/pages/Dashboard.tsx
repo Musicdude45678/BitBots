@@ -4,7 +4,8 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { PlusIcon, PencilIcon, ShareIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { deleteBot, updateBot, shareBot } from '../services/chatService';
+import { deleteBot, updateBot } from '../services/chatService';
+import { shareBot } from '../utils/sharing';
 
 interface Bot {
   id: string;
@@ -18,6 +19,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [deletingBotId, setDeletingBotId] = useState<string | null>(null);
   const [sharingBotId, setSharingBotId] = useState<string | null>(null);
+  const [shareSuccess, setShareSuccess] = useState(false);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
@@ -51,6 +53,27 @@ export default function Dashboard() {
 
     fetchBots();
   }, [currentUser]);
+
+  const handleShare = async (botId: string) => {
+    const bot = bots.find(b => b.id === botId);
+    setSharingBotId(botId);
+    
+    const result = await shareBot({
+      botId,
+      name: bot?.name,
+      description: bot?.systemPrompt
+    });
+
+    if (result.copied) {
+      setShareSuccess(true);
+      setTimeout(() => {
+        setShareSuccess(false);
+        setSharingBotId(null);
+      }, 2000);
+    } else {
+      setSharingBotId(null);
+    }
+  };
 
   return (
     <div className="w-full">
@@ -100,28 +123,14 @@ export default function Dashboard() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      const userId = prompt('Enter user ID to share with:');
-                      if (userId) {
-                        setSharingBotId(bot.id);
-                        shareBot(bot.id, userId)
-                          .then(() => {
-                            alert('Bot shared successfully!');
-                          })
-                          .catch((error) => {
-                            console.error('Error sharing bot:', error);
-                            alert('Failed to share bot. Please try again.');
-                          })
-                          .finally(() => {
-                            setSharingBotId(null);
-                          });
-                      }
+                      handleShare(bot.id);
                     }}
                     disabled={sharingBotId === bot.id}
                     className="p-1 text-gray-400 hover:text-green-600 transition-colors disabled:opacity-50"
                     title="Share Bot"
                   >
                     {sharingBotId === bot.id ? (
-                      <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-green-600" />
+                      shareSuccess ? 'Copied!' : <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-green-600" />
                     ) : (
                       <ShareIcon className="h-5 w-5" />
                     )}

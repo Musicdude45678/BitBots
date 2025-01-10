@@ -18,7 +18,14 @@ export default function Login() {
       setError('');
       setLoading(true);
       await login(email, password);
-      navigate('/');
+      
+      // Check if we have a pending shared bot
+      const pendingBotId = sessionStorage.getItem('pendingSharedBot');
+      if (pendingBotId) {
+        navigate(`/create-bot?sharedBot=${pendingBotId}`);
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       console.error('Login error:', err);
       if (err instanceof FirebaseError) {

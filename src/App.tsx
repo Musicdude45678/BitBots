@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import CreateBot from './pages/CreateBot';
 import ChatInterface from './pages/ChatInterface';
+import ShareRedirect from './pages/ShareRedirect';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
                 <Signup />
               </div>
             } />
+            <Route path="/share/:botId" element={<ShareRedirect />} />
             <Route
               path="/*"
               element={

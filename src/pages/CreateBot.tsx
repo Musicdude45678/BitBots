@@ -1,6 +1,6 @@
-import { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { collection, addDoc } from 'firebase/firestore';
+import { useState, FormEvent, useEffect } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -11,6 +11,47 @@ export default function CreateBot() {
   const [loading, setLoading] = useState(false);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const sharedBotId = searchParams.get('sharedBot');
+
+  useEffect(() => {
+    async function loadSharedBot() {
+      if (!sharedBotId) return;
+
+      try {
+        setLoading(true);
+        const botDoc = await getDoc(doc(db, 'bots', sharedBotId));
+        
+        if (botDoc.exists()) {
+          const botData = botDoc.data();
+          setName(`${botData.name} (Copy)`);
+          setSystemPrompt(botData.systemPrompt);
+        }
+      } catch (err) {
+        console.error('Error loading shared bot:', err);
+        setError('Failed to load shared bot details');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadSharedBot();
+  }, [sharedBotId]);
+
+  useEffect(() => {
+    if (!currentUser) {
+      // Store the shared bot ID in session storage before redirecting
+      if (sharedBotId) {
+        sessionStorage.setItem('pendingSharedBot', sharedBotId);
+      }
+      navigate('/login');
+    } else if (sessionStorage.getItem('pendingSharedBot')) {
+      // If we have a pending shared bot after login, redirect to create with the ID
+      const pendingBotId = sessionStorage.getItem('pendingSharedBot');
+      sessionStorage.removeItem('pendingSharedBot');
+      navigate(`/create-bot?sharedBot=${pendingBotId}`);
+    }
+  }, [currentUser, navigate, sharedBotId]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

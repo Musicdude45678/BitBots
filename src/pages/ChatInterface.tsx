@@ -1,6 +1,6 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PaperAirplaneIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/solid';
+import { PaperAirplaneIcon, TrashIcon, PlusIcon, ShareIcon } from '@heroicons/react/24/solid';
 import { auth } from '../config/firebase';
 import { 
   createChat, 
@@ -14,6 +14,7 @@ import {
   Bot,
   Chat
 } from '../services/chatService';
+import { shareBot } from '../utils/sharing';
 
 interface Message {
   id?: string;
@@ -33,6 +34,8 @@ export default function ChatInterface() {
   const [creatingChat, setCreatingChat] = useState(false);
   const [deletingChatId, setDeletingChatId] = useState<string | null>(null);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState(false);
   const { botId } = useParams();
   const navigate = useNavigate();
 
@@ -228,6 +231,23 @@ export default function ChatInterface() {
     }
   }
 
+  const handleShare = async () => {
+    if (!botId) return;
+    
+    setSharing(true);
+    const result = await shareBot({
+      botId,
+      name: bot?.name,
+      description: bot?.systemPrompt
+    });
+
+    if (result.copied) {
+      setShareSuccess(true);
+      setTimeout(() => setShareSuccess(false), 2000);
+    }
+    setSharing(false);
+  };
+
   if (!bot || !auth.currentUser) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -315,12 +335,26 @@ export default function ChatInterface() {
                   <p className="text-sm text-gray-500">{bot.description}</p>
                 )}
               </div>
-              <button
-                onClick={() => navigate('/')}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-              >
-                Back to Dashboard
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleShare}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 flex items-center gap-2"
+                  disabled={sharing}
+                >
+                  {sharing ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-gray-600" />
+                  ) : (
+                    <ShareIcon className="h-4 w-4" />
+                  )}
+                  {shareSuccess ? 'Copied!' : 'Share'}
+                </button>
+                <button
+                  onClick={() => navigate('/')}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Back to Dashboard
+                </button>
+              </div>
             </div>
           </div>
         </div>
