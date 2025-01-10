@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,md}\"",
-    "prepare": "husky install"
+    "prepare": "husky install || exit 0"
   },
   "dependencies": {
     "@firebase/auth": "^1.8.1",
