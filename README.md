@@ -44,7 +44,7 @@ BitBots is a web application that allows users to create, customize, and share A
 
 1. Clone the repository:
 ```bash
-git clone [your-repo-url]
+git clone [your-repo-url] 
 cd BitBots
 ```
 
