@@ -2,8 +2,9 @@ version: '3.8'
 
 services:
   frontend:  # Renamed from 'app' to 'frontend' to be more explicit
+    image: bitbots_frontend:${VERSION:-latest}
     build:
-      context: .
+      context: https://github.com/Musicdude45678/BitBots.git#main
       dockerfile: Dockerfile
       args:
         - VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}
@@ -14,6 +15,7 @@ services:
         - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
         - VITE_OPENAI_API_KEY=${VITE_OPENAI_API_KEY}
         - VITE_APP_ENV=${VITE_APP_ENV:-production}
+      no_cache: true
     ports:
       - "8080:80"
     restart: unless-stopped
