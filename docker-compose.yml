@@ -15,9 +15,14 @@ services:
         - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
         - VITE_OPENAI_API_KEY=${VITE_OPENAI_API_KEY}
         - VITE_APP_ENV=${VITE_APP_ENV:-production}
-      no_cache: true
+      labels:
+        - "com.docker.compose.project.working_dir=${PWD}"
+        - "com.docker.compose.project.config_files=docker-compose.yml"
     ports:
       - "8080:80"
     restart: unless-stopped
     environment:
       - NODE_ENV=production
+    labels:
+      - "com.docker.compose.service=frontend"
+      - "com.docker.compose.project=bitbots"
