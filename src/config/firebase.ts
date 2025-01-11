@@ -3,7 +3,6 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  // Your Firebase configuration will go here
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -12,10 +11,15 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Debug log to check if environment variables are properly loaded
+// Debug log to check environment
+const isDevelopment = import.meta.env.DEV;
 if (!firebaseConfig.apiKey) {
-  console.error('Firebase API Key is missing!');
-  console.log('Environment variables available:', import.meta.env);
+  console.error(`Firebase configuration missing in ${isDevelopment ? 'development' : 'production'} environment`);
+  console.log('Available environment variables:', {
+    VITE_FIREBASE_API_KEY: import.meta.env.VITE_FIREBASE_API_KEY,
+    VITE_FIREBASE_AUTH_DOMAIN: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    VITE_FIREBASE_PROJECT_ID: import.meta.env.VITE_FIREBASE_PROJECT_ID
+  });
 }
 
 const app = initializeApp(firebaseConfig);
