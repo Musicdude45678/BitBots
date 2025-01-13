@@ -277,21 +277,14 @@ export default function ChatInterface() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Mobile sidebar backdrop */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 z-20 bg-gray-600 bg-opacity-75 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* Chat List Sidebar */}
       <div 
-        className={`fixed inset-y-0 left-0 z-40 w-72 transform transition-transform duration-300 ease-in-out 
+        className={`w-72 flex-shrink-0 transform transition-transform duration-300 ease-in-out 
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
-          lg:relative lg:translate-x-0 
-          bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col`}
+          lg:translate-x-0 
+          bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col
+          fixed inset-y-0 left-0 z-40 lg:relative`}
       >
         {/* Sidebar Header with New Chat Button */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
@@ -367,8 +360,16 @@ export default function ChatInterface() {
         </div>
       </div>
 
+      {/* Mobile sidebar backdrop */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-30 bg-gray-600 bg-opacity-75 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col relative lg:pl-72">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
         <div className="sticky top-0 z-30 bg-white dark:bg-gray-800 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -424,10 +425,20 @@ export default function ChatInterface() {
             <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
           </div>
         ) : (
-          <div className="flex-1 overflow-hidden">
-            <div className="h-full flex flex-col max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto py-6" ref={messagesEndRef}>
+          <div className="flex flex-col h-[calc(100vh-64px)]">
+            {/* Fixed Header */}
+            <div className="flex-none bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Legal eagle</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">legal advice</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Scrollable Messages */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="space-y-6">
                   {messages.map((message, index) => (
                     <div
@@ -458,9 +469,11 @@ export default function ChatInterface() {
                   )}
                 </div>
               </div>
+            </div>
 
-              {/* Input form */}
-              <div className="border-t border-gray-200 dark:border-gray-700 py-4">
+            {/* Fixed Footer - Input Box */}
+            <div className="flex-none bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <form onSubmit={handleSubmit} className="flex space-x-4">
                   <input
                     type="text"
@@ -474,7 +487,11 @@ export default function ChatInterface() {
                     disabled={!newMessage.trim() || sending}
                     className="rounded-lg bg-blue-600 dark:bg-blue-500 px-4 py-2 text-white hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
                   >
-                    Send
+                    {sending ? (
+                      <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
+                    ) : (
+                      <span>Send</span>
+                    )}
                   </button>
                 </form>
               </div>
